@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>client</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>client</name>
+
+  <parent>
+    <groupId>com.axwave.ak.test</groupId>
+    <artifactId>audio-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <properties>
+    <apache.common.collections.version>4.0</apache.common.collections.version>
+    <apache.commons.configuration.version>2.1</apache.commons.configuration.version>
+    <apache.commons.beanutils.version>1.9.3</apache.commons.beanutils.version>
+  </properties>
+
+  <build>
+    <finalName>${artifactId}</finalName>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.axwave.ak.test</groupId>
+      <artifactId>transport</artifactId>
+      <version>${transport.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${apache.common.collections.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${apache.commons.configuration.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${apache.commons.beanutils.version}</version>
+    </dependency>
+  </dependencies>
+</project>
