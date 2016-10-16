@@ -76,7 +76,7 @@ public class SoundRecorder {
 
     private void scheduleSendTask() {
         TimerTask sendTask = getSendTask();
-        sendTaskTimer.schedule(sendTask, SAMPLE_SEND_SECONDS * 1000, SEND_RATE_SECONDS * 1000);
+        sendTaskTimer.schedule(sendTask, SAMPLE_SEND_SECONDS * 1000L, SEND_RATE_SECONDS * 1000L);
     }
 
     private TimerTask getSendTask() {

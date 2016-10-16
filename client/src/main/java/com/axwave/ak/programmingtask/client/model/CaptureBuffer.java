@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 @Getter
+@SuppressWarnings("unused")
 public class CaptureBuffer {
     private final CircularFifoQueue<Byte> dataQueue;
     private final CircularFifoQueue<Long> timeStampQueue;

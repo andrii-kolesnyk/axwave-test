@@ -4,6 +4,7 @@ import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.transport.model.Metadata;
 import com.axwave.ak.programmingtask.transport.model.SoundSample;
 import com.axwave.ak.programmingtask.transport.service.AudioService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 @Service
+@SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
 public class AudioServiceImpl implements AudioService {
     private static final Logger log = Logger.getLogger(AudioServiceImpl.class);
 
@@ -38,8 +40,7 @@ public class AudioServiceImpl implements AudioService {
         File file = new File(filePath);
         log.debug("write sample to file: " + file.getPath());
 
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             fileOutputStream.write(sample.getSample());
             fileOutputStream.flush();
             fileOutputStream.close();

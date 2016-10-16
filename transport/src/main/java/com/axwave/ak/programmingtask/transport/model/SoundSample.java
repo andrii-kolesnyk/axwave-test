@@ -1,13 +1,19 @@
 package com.axwave.ak.programmingtask.transport.model;
 
 import com.axwave.ak.programmingtask.transport.format.SoundFormat;
-import lombok.*;
-
-import java.io.Serializable;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @ToString(callSuper = true, exclude = "sample")
 @NoArgsConstructor
-public class SoundSample extends Metadata implements Serializable {
+@SuppressWarnings("unused")
+@SuppressFBWarnings("EI_EXPOSE_REP")
+public class SoundSample extends Metadata {
+    private static final long serialVersionUID = 4353278496632602706L;
+
     @Getter
     @Setter
     private byte[] sample;
@@ -21,4 +27,14 @@ public class SoundSample extends Metadata implements Serializable {
     public SoundFormat getFormat() {
         return SoundFormat.getSoundFormatById(formatId);
     }
+
+//    @SuppressWarnings("EI_EXPOSE_REP")
+//    public byte[] getSample() {
+//        return sample;
+//    }
+//
+//    @SuppressWarnings("EI_EXPOSE_REP")
+//    public void setSample(byte[] sample) {
+//        this.sample = sample;
+//    }
 }
