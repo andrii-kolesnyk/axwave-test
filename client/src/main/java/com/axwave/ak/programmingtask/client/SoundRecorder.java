@@ -1,6 +1,6 @@
 package com.axwave.ak.programmingtask.client;
 
-import com.axwave.ak.programmingtask.client.Config.Config;
+import com.axwave.ak.programmingtask.client.config.Config;
 import com.axwave.ak.programmingtask.client.exception.LineNotSupportedError;
 import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.client.model.CaptureBuffer;
