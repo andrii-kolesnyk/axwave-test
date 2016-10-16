@@ -1,5 +1,6 @@
 package com.axwave.ak.programmingtask.server.service;
 
+import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.transport.model.Metadata;
 import com.axwave.ak.programmingtask.transport.model.SoundSample;
 import com.axwave.ak.programmingtask.transport.service.AudioService;
@@ -31,11 +32,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     private void saveSoundSampleToFolder(SoundSample sample) {
-        File saveFolder = new File(safeFolderPath + "/" + sample.getFormat().getEncodingName());
-
-        if (!saveFolder.exists()) {
-            saveFolder.mkdir();
-        }
+        File saveFolder = getSaveFolderForSoundFormat(sample.getFormat());
 
         String filePath = saveFolder.getPath() + "/" + sample.getTimestamp() + sample.getFormat().getFileExtension();
         File file = new File(filePath);
@@ -49,5 +46,14 @@ public class AudioServiceImpl implements AudioService {
         } catch (IOException e) {
             log.error("Error occurred during writing sound sample to file " + file.getPath(), e);
         }
+    }
+
+    private File getSaveFolderForSoundFormat(SoundFormat soundFormat) {
+        File saveFolder = new File(safeFolderPath + "/" + soundFormat.getEncodingName());
+
+        if (!saveFolder.exists()) {
+            saveFolder.mkdir();
+        }
+        return saveFolder;
     }
 }
