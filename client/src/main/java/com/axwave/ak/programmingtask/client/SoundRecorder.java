@@ -5,6 +5,7 @@ import com.axwave.ak.programmingtask.client.exception.LineNotSupportedError;
 import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.client.model.CaptureBuffer;
 import com.axwave.ak.programmingtask.client.model.RecordSample;
+import com.axwave.ak.programmingtask.transport.model.Metadata;
 import com.axwave.ak.programmingtask.transport.model.SoundSample;
 import com.axwave.ak.programmingtask.transport.service.AudioService;
 import com.caucho.hessian.HessianException;
@@ -195,7 +196,8 @@ public class SoundRecorder {
     private void sendSample(SoundSample sample) {
         log.debug(sample.toString());
         try {
-            service.saveSoundSample(sample);
+            Metadata echoResponse = service.saveSoundSample(sample);
+            log.debug(echoResponse);
         } catch (HessianRuntimeException | HessianException e) {
             log.debug("Communication error occurred, stopping capturing.", e);
             finishCapture();
