@@ -29,7 +29,7 @@ public class SampleSender {
     private final ThreadPoolExecutor sendTaskExecutor;
     private final SampleRecorder sampleRecorder;
 
-    public SampleSender(AudioService service, SampleRecorder sampleRecorder){
+    public SampleSender(AudioService service, SampleRecorder sampleRecorder) {
         this.service = service;
         this.sampleRecorder = sampleRecorder;
 
@@ -40,7 +40,10 @@ public class SampleSender {
                 EXECUTOR_KEEP_ALIVE, EXECUTOR_KEEP_ALIVE_TIME_UNIT, workQueue);
     }
 
-    public void start(){
+    /**
+     * Start send task
+     */
+    public void start() {
         scheduleSendTask();
     }
 
@@ -53,6 +56,7 @@ public class SampleSender {
     /**
      * Create task to poll recordSample from {@link SampleRecorder#taskQueue} and send it to server
      * in separate thread using {@link #sendTaskExecutor}
+     *
      * @return new TimerTask
      */
     private TimerTask getSendTask() {
@@ -76,7 +80,13 @@ public class SampleSender {
         };
     }
 
-    private SoundSample createSoundSample(RecordSample recordSample){
+    /**
+     * Creates {@link SoundSample} object to send to server from {@link RecordSample} buffer object
+     *
+     * @param recordSample buffer object received from {@link SampleRecorder}
+     * @return new {@link SoundSample} for sending to server
+     */
+    private SoundSample createSoundSample(RecordSample recordSample) {
         SoundSample soundSample = new SoundSample();
         soundSample.setMagicNumber(MAGIC_NUMBER);
         soundSample.setFormat(recordSample.getFormat());
@@ -87,6 +97,7 @@ public class SampleSender {
 
     /**
      * Send sample to server via hessian {@link #service AudioService}
+     *
      * @param sample {@link SoundSample } to send
      */
     private void sendSample(SoundSample sample) {

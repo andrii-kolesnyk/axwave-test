@@ -27,14 +27,4 @@ public class SoundSample extends Metadata {
     public SoundFormat getFormat() {
         return SoundFormat.getSoundFormatById(formatId);
     }
-
-//    @SuppressWarnings("EI_EXPOSE_REP")
-//    public byte[] getSample() {
-//        return sample;
-//    }
-//
-//    @SuppressWarnings("EI_EXPOSE_REP")
-//    public void setSample(byte[] sample) {
-//        this.sample = sample;
-//    }
 }

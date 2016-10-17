@@ -49,6 +49,11 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
+    /**
+     * Get folder where sound sample will be stored based on sample's {@link SoundFormat}
+     * @param soundFormat {@link SoundFormat} of the sample
+     * @return folder where sound sample will be stored
+     */
     private File getSaveFolderForSoundFormat(SoundFormat soundFormat) {
         File saveFolder = new File(safeFolderPath + "/" + soundFormat.getEncodingName());
 

@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * Buffer class for transfer sample of some period to {@link com.axwave.ak.programmingtask.client.SampleSender}
+ */
 @Getter
 @ToString
 @AllArgsConstructor

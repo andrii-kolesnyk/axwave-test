@@ -47,7 +47,7 @@ public class SampleRecorder {
     }
 
     /**
-     * Starting capturing audio samples
+     * Starting capturing sound samples
      */
     public void start() {
         captureRecordSample();
@@ -88,6 +88,11 @@ public class SampleRecorder {
         return captureBuffer.getTimeStampQueue().peek();
     }
 
+    /**
+     * Starts capturing and returns {@link AudioInputStream} from which data can be red
+     * @throws Error in case if line is not available
+     * @return {@link AudioInputStream} from which data can be red
+     */
     private AudioInputStream startCapture() {
         try {
             audioFormat = defineAudioFormat();
@@ -104,12 +109,15 @@ public class SampleRecorder {
             log.debug("Start capturing...");
 
             return new AudioInputStream(line);
-        } catch (LineUnavailableException ex) {
-            ex.printStackTrace();
-            throw new Error(ex);
+        } catch (LineUnavailableException e) {
+            log.error(e);
+            throw new Error(e);
         }
     }
 
+    /**
+     * Stop capturing and close associated {@link #line}
+     */
     void finishCapture() {
         this.continueCapture.set(false);
         if (Objects.nonNull(line)) {
@@ -119,6 +127,10 @@ public class SampleRecorder {
         log.debug("Finished");
     }
 
+    /**
+     * Defines audio format
+     * @return
+     */
     private AudioFormat defineAudioFormat() {
         boolean signed = true;
         boolean bigEndian = true;
