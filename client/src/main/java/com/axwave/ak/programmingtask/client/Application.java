@@ -16,7 +16,7 @@ public class Application {
         SampleRecorder sampleRecorder = new SampleRecorder();
         SampleSender sender = new SampleSender(service, sampleRecorder);
 
-        sender.scheduleSendTask();
+        sender.start();
         sampleRecorder.start();
     }
 }

@@ -41,7 +41,11 @@ public class SampleSender {
                 EXECUTOR_KEEP_ALIVE, EXECUTOR_KEEP_ALIVE_TIME_UNIT, workQueue);
     }
 
-    public void scheduleSendTask() {
+    public void start(){
+        scheduleSendTask();
+    }
+
+    private void scheduleSendTask() {
         TimerTask sendTask = getSendTask();
         sendTaskTimer.schedule(sendTask, SampleRecorder.SAMPLE_SEND_SECONDS * 1000L,
                 SampleRecorder.SEND_RATE_SECONDS * 1000L);
