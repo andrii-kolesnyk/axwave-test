@@ -46,7 +46,6 @@ public class SampleRecorder {
         this.continueCapture = new AtomicBoolean(true);
     }
 
-    //todo separate sound recording and sending samples
     /**
      * Starting capturing audio samples
      */
