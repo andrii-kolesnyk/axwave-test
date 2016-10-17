@@ -2,102 +2,56 @@ package com.axwave.ak.programmingtask.client;
 
 import com.axwave.ak.programmingtask.client.config.Config;
 import com.axwave.ak.programmingtask.client.exception.LineNotSupportedError;
-import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.client.model.CaptureBuffer;
 import com.axwave.ak.programmingtask.client.model.RecordSample;
-import com.axwave.ak.programmingtask.transport.model.Metadata;
-import com.axwave.ak.programmingtask.transport.model.SoundSample;
-import com.axwave.ak.programmingtask.transport.service.AudioService;
-import com.caucho.hessian.HessianException;
-import com.caucho.hessian.client.HessianRuntimeException;
+import com.axwave.ak.programmingtask.transport.format.SoundFormat;
+import lombok.Getter;
 import org.apache.log4j.Logger;
 
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SoundRecorder {
+public class SampleRecorder {
+    private static final Logger log = Logger.getLogger(SampleRecorder.class);
+
     private static final float SAMPLE_RATE = Config.getSampleRate();
     private static final int SAMPLE_SIZE_IN_BITS = Config.getSampleSizeInBits();
     private static final int CHANNELS = Config.getChannels();
 
     private static final int CAPTURE_RATE_SECONDS = Config.getCaptureRateSeconds();
 
-    private static final int SAMPLE_SEND_SECONDS = Config.getSampleSendSeconds();
-    private static final int SEND_RATE_SECONDS = Config.getSendRateSeconds();
-
-    private static final int EXECUTOR_CORE_POOL_SIZE = Config.getExecutorCorePoolSize();
-    private static final int EXECUTOR_MAXIMUM_POOL_SIZE = Config.getExecutorMaximumPoolSize();
-    private static final int EXECUTOR_KEEP_ALIVE = Config.getExecutorKeepAliveSeconds();
-    private static final TimeUnit EXECUTOR_KEEP_ALIVE_TIME_UNIT = Config.getExecutorKeepAliveTimeUnit();
+    static final int SAMPLE_SEND_SECONDS = Config.getSampleSendSeconds();
+    static final int SEND_RATE_SECONDS = Config.getSendRateSeconds();
 
     private static final int BYTES_PER_SECOND = SAMPLE_SIZE_IN_BITS / 8 * CHANNELS * (int) SAMPLE_RATE;
 
     private static final int CAPTURE_BUFFER_DATA_QUEUE_SIZE = BYTES_PER_SECOND * SAMPLE_SEND_SECONDS;
     private static final int CAPTURE_BUFFER_TIMESTAMP_QUEUE_SIZE = SAMPLE_SEND_SECONDS;
 
-    private static final short MAGIC_NUMBER = Config.getMagicNumber();
-
-    private static final Logger log = Logger.getLogger(SoundRecorder.class);
-
+    @Getter
     private final ConcurrentLinkedQueue<RecordSample> taskQueue = new ConcurrentLinkedQueue<>();
     private final CaptureBuffer captureBuffer;
 
-    private final Timer sendTaskTimer;
-
     private TargetDataLine line;
-    private final AudioService service;
     private final AtomicBoolean continueCapture;
     private AudioFormat audioFormat;
 
-    private final ThreadPoolExecutor sendTaskExecutor;
 
-    public SoundRecorder(AudioService service) {
-        this.service = service;
-        this.sendTaskTimer = new Timer();
+    public SampleRecorder() {
         this.captureBuffer = new CaptureBuffer(CAPTURE_BUFFER_DATA_QUEUE_SIZE, CAPTURE_BUFFER_TIMESTAMP_QUEUE_SIZE);
         this.continueCapture = new AtomicBoolean(true);
-
-        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-        this.sendTaskExecutor = new ThreadPoolExecutor(EXECUTOR_CORE_POOL_SIZE, EXECUTOR_MAXIMUM_POOL_SIZE,
-                EXECUTOR_KEEP_ALIVE, EXECUTOR_KEEP_ALIVE_TIME_UNIT, workQueue);
     }
 
+    //todo separate sound recording and sending samples
+    /**
+     * Starting capturing audio samples
+     */
     public void start() {
-        scheduleSendTask();
-
         captureRecordSample();
-    }
-
-    private void scheduleSendTask() {
-        TimerTask sendTask = getSendTask();
-        sendTaskTimer.schedule(sendTask, SAMPLE_SEND_SECONDS * 1000L, SEND_RATE_SECONDS * 1000L);
-    }
-
-    private TimerTask getSendTask() {
-        return new TimerTask() {
-            @Override
-            public void run() {
-                //wait for recordSample
-                while (taskQueue.size() == 0) {
-                    Thread.yield();
-                }
-
-                RecordSample recordSample = taskQueue.poll();
-
-                //synchronize on object created in captureRecordSample() method
-                synchronized (recordSample) {
-                    SoundSample soundSample = getSoundSample(recordSample.getSample(), recordSample.getTimestamp());
-
-                    sendTaskExecutor.execute(() -> sendSample(soundSample));
-                }
-            }
-        };
     }
 
     private void captureRecordSample() {
@@ -119,7 +73,8 @@ public class SoundRecorder {
                     for (int i = 0; i < sampleBufferLength; i++) {
                         sampleBuffer[i] = captureBuffer.getDataQueue().get(i);
                     }
-                    taskQueue.add(new RecordSample(sampleBuffer, getTimestamp()));
+                    taskQueue.add(new RecordSample(sampleBuffer, getTimestamp(),
+                            SoundFormat.getSoundFormatForEncodingName(audioFormat.getEncoding().toString())));
 
                     //reset read number to avoid overflow
                     numberOfReads = SAMPLE_SEND_SECONDS;
@@ -130,7 +85,11 @@ public class SoundRecorder {
         }
     }
 
-    public AudioInputStream startCapture() {
+    private Long getTimestamp() {
+        return captureBuffer.getTimeStampQueue().peek();
+    }
+
+    private AudioInputStream startCapture() {
         try {
             audioFormat = defineAudioFormat();
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, audioFormat);
@@ -152,7 +111,7 @@ public class SoundRecorder {
         }
     }
 
-    private void finishCapture() {
+    void finishCapture() {
         this.continueCapture.set(false);
         if (Objects.nonNull(line)) {
             line.stop();
@@ -178,31 +137,5 @@ public class SoundRecorder {
     private void captureTimestamp() {
         log.debug("Sample timestamp " + OffsetDateTime.now().toString());
         captureBuffer.getTimeStampQueue().add(System.currentTimeMillis());
-    }
-
-    private SoundSample getSoundSample(byte[] sample, long timestamp) {
-        SoundSample soundSample = new SoundSample();
-        soundSample.setMagicNumber(MAGIC_NUMBER);
-        soundSample.setFormat(SoundFormat.getSoundFormatForEncodingName(audioFormat.getEncoding().toString()));
-        soundSample.setSample(sample);
-        soundSample.setTimestamp(timestamp);
-        return soundSample;
-    }
-
-    private Long getTimestamp() {
-        return captureBuffer.getTimeStampQueue().peek();
-    }
-
-    private void sendSample(SoundSample sample) {
-        log.debug(sample.toString());
-        try {
-            Metadata echoResponse = service.saveSoundSample(sample);
-            log.debug(echoResponse);
-        } catch (HessianRuntimeException | HessianException e) {
-            log.debug("Communication error occurred, stopping capturing.", e);
-            finishCapture();
-            sendTaskExecutor.shutdown();
-            sendTaskTimer.cancel();
-        }
     }
 }

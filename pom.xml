@@ -30,6 +30,8 @@
     <lombok.version>1.16.10</lombok.version>
     <log4j.version>1.2.17</log4j.version>
     <transport.version>1.0.0-SNAPSHOT</transport.version>
+
+    <skipCodeChecks>true</skipCodeChecks>
   </properties>
 
   <build>
@@ -119,6 +121,16 @@
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>findbugs-maven-plugin</artifactId>
       <version>${findbugs.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-jdk14</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

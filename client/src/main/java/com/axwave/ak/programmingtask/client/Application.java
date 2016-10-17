@@ -13,6 +13,10 @@ public class Application {
         HessianProxyFactory hessianProxyFactory = new HessianProxyFactory();
         final AudioService service = (AudioService) hessianProxyFactory.create(AudioService.class, SERVER_URL);
 
-        new SoundRecorder(service).start();
+        SampleRecorder sampleRecorder = new SampleRecorder();
+        SampleSender sender = new SampleSender(service, sampleRecorder);
+
+        sender.scheduleSendTask();
+        sampleRecorder.start();
     }
 }
