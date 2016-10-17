@@ -2,7 +2,6 @@ package com.axwave.ak.programmingtask.client;
 
 import com.axwave.ak.programmingtask.client.config.Config;
 import com.axwave.ak.programmingtask.client.model.RecordSample;
-import com.axwave.ak.programmingtask.transport.format.SoundFormat;
 import com.axwave.ak.programmingtask.transport.model.Metadata;
 import com.axwave.ak.programmingtask.transport.model.SoundSample;
 import com.axwave.ak.programmingtask.transport.service.AudioService;
@@ -52,7 +51,8 @@ public class SampleSender {
     }
 
     /**
-     * Create task to poll recordSample from {@link SampleRecorder#taskQueue} and send it to server using {@link #sendTaskExecutor}
+     * Create task to poll recordSample from {@link SampleRecorder#taskQueue} and send it to server
+     * in separate thread using {@link #sendTaskExecutor}
      * @return new TimerTask
      */
     private TimerTask getSendTask() {
@@ -69,24 +69,26 @@ public class SampleSender {
 
                 //synchronize on object created in captureRecordSample() method
                 synchronized (recordSample) {
-                    SoundSample soundSample = getSoundSample(recordSample.getSample(), recordSample.getTimestamp(),
-                            recordSample.getFormat());
-
+                    SoundSample soundSample = createSoundSample(recordSample);
                     sendTaskExecutor.execute(() -> sendSample(soundSample));
                 }
             }
         };
     }
 
-    private SoundSample getSoundSample(byte[] sample, long timestamp, SoundFormat format) {
+    private SoundSample createSoundSample(RecordSample recordSample){
         SoundSample soundSample = new SoundSample();
         soundSample.setMagicNumber(MAGIC_NUMBER);
-        soundSample.setFormat(format);
-        soundSample.setSample(sample);
-        soundSample.setTimestamp(timestamp);
+        soundSample.setFormat(recordSample.getFormat());
+        soundSample.setSample(recordSample.getSample());
+        soundSample.setTimestamp(recordSample.getTimestamp());
         return soundSample;
     }
 
+    /**
+     * Send sample to server via hessian {@link #service AudioService}
+     * @param sample {@link SoundSample } to send
+     */
     private void sendSample(SoundSample sample) {
         log.debug("Sending sample " + sample.toString());
         try {
