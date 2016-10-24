@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>server</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>${artifactId}</name>
@@ -17,6 +17,7 @@
 
   <properties>
     <spring.boot.maven.plugin.version>1.4.1.RELEASE</spring.boot.maven.plugin.version>
+    <spring.boot.dependencies.version>2.0.0.BUILD-SNAPSHOT</spring.boot.dependencies.version>
   </properties>
 
   <build>
@@ -26,6 +27,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -58,7 +67,7 @@
         <!-- Import dependency management from Spring Boot -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.0.0.BUILD-SNAPSHOT</version>
+        <version>${spring.boot.dependencies.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
