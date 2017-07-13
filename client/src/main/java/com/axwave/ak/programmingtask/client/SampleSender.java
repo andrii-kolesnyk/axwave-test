@@ -71,11 +71,9 @@ public class SampleSender {
 
                 RecordSample recordSample = taskQueue.poll();
 
-                //synchronize on object created in captureRecordSample() method
-                synchronized (recordSample) {
-                    SoundSample soundSample = createSoundSample(recordSample);
-                    sendTaskExecutor.execute(() -> sendSample(soundSample));
-                }
+                SoundSample soundSample = createSoundSample(recordSample);
+                sendTaskExecutor.execute(() -> sendSample(soundSample));
+
             }
         };
     }
